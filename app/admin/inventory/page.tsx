@@ -26,6 +26,7 @@ import {
   DropdownMenuSeparator, 
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import Image from "next/image";
 import Link from "next/link";
 import { toast } from "sonner";
@@ -33,8 +34,16 @@ import { cn } from "@/lib/utils";
 
 export default function InventoryPage() {
   const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  
+  // Filters state
+  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [selectedStatus, setSelectedStatus] = useState("all");
+  const [minPrice, setMinPrice] = useState("");
+  const [maxPrice, setMaxPrice] = useState("");
+  const [sortBy, setSortBy] = useState("newest");
   const supabase = createClient();
 
   useEffect(() => {
@@ -43,15 +52,19 @@ export default function InventoryPage() {
 
   const fetchProducts = async () => {
     setLoading(true);
-    const { data, error } = await supabase
-      .from("products")
-      .select("*, categories(name)")
-      .order("created_at", { ascending: false });
+    const [productsRes, categoriesRes] = await Promise.all([
+      supabase.from("products").select("*, categories(name)").order("created_at", { ascending: false }),
+      supabase.from("categories").select("id, name")
+    ]);
 
-    if (error) {
+    if (productsRes.error) {
       toast.error("שגיאה בטעינת המוצרים");
     } else {
-      setProducts(data || []);
+      setProducts(productsRes.data || []);
+    }
+    
+    if (categoriesRes.data) {
+      setCategories(categoriesRes.data);
     }
     setLoading(false);
   };
@@ -83,10 +96,22 @@ export default function InventoryPage() {
     }
   };
 
-  const filteredProducts = products.filter(p => 
-    p.title.toLowerCase().includes(search.toLowerCase()) || 
-    p.description?.toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredProducts = products.filter(p => {
+    const matchesSearch = p.title.toLowerCase().includes(search.toLowerCase()) || p.description?.toLowerCase().includes(search.toLowerCase());
+    const matchesCategory = selectedCategory === "all" || p.category_id === selectedCategory;
+    const matchesStatus = selectedStatus === "all" || p.status === selectedStatus;
+    const matchesMinPrice = minPrice === "" || p.price >= Number(minPrice);
+    const matchesMaxPrice = maxPrice === "" || p.price <= Number(maxPrice);
+    
+    return matchesSearch && matchesCategory && matchesStatus && matchesMinPrice && matchesMaxPrice;
+  }).sort((a, b) => {
+    if (sortBy === "newest") return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    if (sortBy === "oldest") return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+    if (sortBy === "price_desc") return b.price - a.price;
+    if (sortBy === "price_asc") return a.price - b.price;
+    if (sortBy === "views_desc") return (b.views || 0) - (a.views || 0);
+    return 0;
+  });
 
   return (
     <div className="space-y-6">
@@ -114,10 +139,101 @@ export default function InventoryPage() {
             onChange={e => setSearch(e.target.value)}
           />
         </div>
-        <Button variant="outline" className="gap-2 font-sans border-border/50">
-          <Filter className="w-4 h-4" />
-          סינון
-        </Button>
+        <Sheet>
+          <SheetTrigger
+            render={
+              <Button variant="outline" className="gap-2 font-sans border-border/50">
+                <Filter className="w-4 h-4" />
+                סינון ומיון
+              </Button>
+            }
+          />
+          <SheetContent side="right" className="font-sans overflow-y-auto w-80">
+            <SheetHeader>
+              <SheetTitle>סינון ומיון פריטים</SheetTitle>
+            </SheetHeader>
+            <div className="py-6 space-y-6">
+              
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-muted-foreground">מיון לפי</label>
+                <select 
+                  className="w-full h-10 px-3 rounded-md border border-input bg-background font-sans"
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                >
+                  <option value="newest">החדשים ביותר</option>
+                  <option value="oldest">הישנים ביותר</option>
+                  <option value="price_desc">מחיר: מהגבוה לנמוך</option>
+                  <option value="price_asc">מחיר: מהנמוך לגבוה</option>
+                  <option value="views_desc">הכי נצפים</option>
+                </select>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-muted-foreground">סטטוס</label>
+                <select 
+                  className="w-full h-10 px-3 rounded-md border border-input bg-background font-sans"
+                  value={selectedStatus}
+                  onChange={(e) => setSelectedStatus(e.target.value)}
+                >
+                  <option value="all">כל הסטטוסים</option>
+                  <option value="published">פעיל (למכירה)</option>
+                  <option value="sold">נמכר</option>
+                  <option value="draft">טיוטה</option>
+                </select>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-muted-foreground">קטגוריה</label>
+                <select 
+                  className="w-full h-10 px-3 rounded-md border border-input bg-background font-sans"
+                  value={selectedCategory}
+                  onChange={(e) => setSelectedCategory(e.target.value)}
+                >
+                  <option value="all">כל הקטגוריות</option>
+                  {categories.map(c => (
+                    <option key={c.id} value={c.id}>{c.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-muted-foreground">טווח מחירים (₪)</label>
+                <div className="flex items-center gap-2">
+                  <Input 
+                    type="number" 
+                    placeholder="מ-" 
+                    value={minPrice} 
+                    onChange={e => setMinPrice(e.target.value)}
+                    className="font-sans"
+                  />
+                  <span>-</span>
+                  <Input 
+                    type="number" 
+                    placeholder="עד-" 
+                    value={maxPrice} 
+                    onChange={e => setMaxPrice(e.target.value)}
+                    className="font-sans"
+                  />
+                </div>
+              </div>
+
+              <Button 
+                variant="outline" 
+                className="w-full mt-4 font-sans" 
+                onClick={() => {
+                  setSelectedCategory("all");
+                  setSelectedStatus("all");
+                  setMinPrice("");
+                  setMaxPrice("");
+                  setSortBy("newest");
+                }}
+              >
+                נקה סינונים
+              </Button>
+            </div>
+          </SheetContent>
+        </Sheet>
       </div>
 
       {/* Inventory Table */}

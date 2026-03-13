@@ -12,11 +12,14 @@ import {
   MoreVertical,
   Trash2,
   Edit,
-  ExternalLink
+  ExternalLink,
+  Search
 } from "lucide-react";
+import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { 
   DropdownMenu, 
@@ -28,6 +31,7 @@ import { toast } from "sonner";
 
 export default function AdminDashboard() {
   const [products, setProducts] = useState<Product[]>([]);
+  const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const supabase = createClient();
 
@@ -78,15 +82,20 @@ export default function AdminDashboard() {
     { title: "פריטים שנמכרו", value: products.filter(p => p.status === 'sold').length, icon: MessageSquare, color: "text-purple-500" },
   ];
 
+  const filteredProducts = products.filter(p => 
+    p.title.toLowerCase().includes(search.toLowerCase()) || 
+    p.description?.toLowerCase().includes(search.toLowerCase())
+  );
+
   return (
-    <div className="space-y-8">
-      <div className="flex items-center justify-between">
+    <div className="space-y-8 pb-10">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-serif font-bold">לוח בקרה</h1>
           <p className="text-muted-foreground font-sans">ניהול החנות והמלאי שלך</p>
         </div>
         <Link href="/admin/add">
-          <button className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg font-medium btn-press">
+          <button className="w-full md:w-auto flex items-center justify-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg font-medium btn-press">
             <Plus className="w-5 h-5" />
             <span>הוספת פריט חדש</span>
           </button>
@@ -110,9 +119,21 @@ export default function AdminDashboard() {
 
       {/* Recent Activity / Items List */}
       <div className="space-y-4">
-        <h2 className="text-xl font-serif font-semibold">פריטים אחרונים</h2>
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <h2 className="text-xl font-serif font-semibold">פריטים אחרונים</h2>
+          <div className="relative w-full md:w-72">
+            <Search className="absolute right-3 top-2.5 w-4 h-4 text-muted-foreground" />
+            <Input 
+              placeholder="חפש לפי שם או תיאור..." 
+              className="pr-10 bg-card border-border/50 shadow-sm font-sans"
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+            />
+          </div>
+        </div>
         <div className="bg-card rounded-2xl border border-border/50 overflow-hidden shadow-sm">
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto -mx-4 md:mx-0 px-4 md:px-0">
+            <div className="min-w-[700px] md:min-w-full inline-block align-middle">
             <table className="w-full text-right">
               <thead>
                 <tr className="border-b border-border bg-muted/30">
@@ -124,7 +145,7 @@ export default function AdminDashboard() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/50">
-                {products.slice(0, 10).map((product) => (
+                {filteredProducts.slice(0, 10).map((product) => (
                   <tr key={product.id} className="hover:bg-muted/20 transition-colors">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
@@ -159,8 +180,10 @@ export default function AdminDashboard() {
                     </td>
                     <td className="px-6 py-4">
                       <DropdownMenu>
-                        <DropdownMenuTrigger className="p-1 hover:bg-muted rounded-full transition-colors">
-                          <MoreVertical className="w-4 h-4 text-muted-foreground" />
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon" className="w-8 h-8 rounded-full">
+                            <MoreVertical className="w-4 h-4 text-muted-foreground" />
+                          </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="font-sans">
                           <DropdownMenuItem onClick={() => window.open(`/product/${product.id}`, "_blank")}>
@@ -186,15 +209,16 @@ export default function AdminDashboard() {
                     </td>
                   </tr>
                 ))}
-                {products.length === 0 && !loading && (
+                {filteredProducts.length === 0 && !loading && (
                   <tr>
                     <td colSpan={5} className="px-6 py-12 text-center text-muted-foreground font-sans">
-                      אין פריטים להצגה...
+                      לא נמצאו פריטים...
                     </td>
                   </tr>
                 )}
               </tbody>
             </table>
+            </div>
           </div>
         </div>
       </div>
