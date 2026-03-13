@@ -68,13 +68,20 @@ export default async function ProductPage({ params }: Props) {
   const typedProduct = product as Product;
   const imageUrl = typedProduct.images?.[0] ?? "/placeholder.jpg";
   
+  // Use headers to determine the actual host for the links
+  const headersList = await import("next/headers").then(m => m.headers());
+  const host = headersList.get("x-forwarded-host") || headersList.get("host") || "localhost:3000";
+  const protocol = headersList.get("x-forwarded-proto") || (host.includes("localhost") ? "http" : "https");
+  const siteUrl = `${protocol}://${host}`;
+  const productUrl = `${siteUrl}/product/${typedProduct.id}`;
+
   // Fallback to env if DB settings are empty
   const whatsappNumber = settings?.whatsapp_number || process.env.NEXT_PUBLIC_WHATSAPP_NUMBER;
   const shopName = settings?.shop_name || process.env.NEXT_PUBLIC_SHOP_NAME || "חנות העתיקות";
   const emailAddress = settings?.email_address;
   
   const whatsappMessage = encodeURIComponent(
-    `היי, ראיתי את הפריט "${typedProduct.title}" (מחיר: ₪${typedProduct.price.toLocaleString()}) באתר ${shopName} ומאוד אהבתי! האם הוא עדיין זמין?`
+    `היי, ראיתי את הפריט "${typedProduct.title}" (מחיר: ₪${typedProduct.price.toLocaleString()}) באתר ${shopName} ומאוד אהבתי! האם הוא עדיין זמין?\n\nקישור לפריט: ${productUrl}`
   );
 
   const emailSubject = encodeURIComponent(`התעניינות בפריט: ${typedProduct.title}`);
@@ -82,7 +89,7 @@ export default async function ProductPage({ params }: Props) {
     `שלום,\n\nאני מתעניין בפריט הבא שראיתי באתר ${shopName}:\n\n` +
     `שם הפריט: ${typedProduct.title}\n` +
     `מחיר: ₪${typedProduct.price.toLocaleString()}\n` +
-    `קישור: ${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/product/${typedProduct.id}\n\n` +
+    `קישור: ${productUrl}\n\n` +
     `אשמח לקבל פרטים נוספים.\nתודה!`
   );
 
@@ -177,7 +184,7 @@ export default async function ProductPage({ params }: Props) {
               
               <ShareButton 
                 title={typedProduct.title} 
-                description={typedProduct.description || ""} 
+                description={`צפו בפריט הייחודי "${typedProduct.title}" (מחיר: ₪${typedProduct.price.toLocaleString()}) באתר ${shopName}!`} 
               />
             </div>
           </div>
