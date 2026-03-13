@@ -16,6 +16,7 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   const [loading, setLoading] = useState(true);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
   const supabase = createClient();
@@ -62,7 +63,6 @@ export default function AdminLayout({
   }
 
   const isLoginPage = pathname === "/admin/login";
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   if (isLoginPage) return <>{children}</>;
 
