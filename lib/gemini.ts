@@ -17,14 +17,14 @@ export interface ProductSuggestion {
 
 /**
  * Generates a title, description, and suggested price for an antique item based on its image.
- * Uses Gemini 1.5 Flash for high-speed vision-to-text processing.
+ * Uses Gemini 2.5 Flash for high-speed vision-to-text processing.
  * 
  * @param imageBase64 - The product image encoded in base64 format (without the data:image prefix).
  * @returns A structured object containing the AI-generated suggestions.
  */
 export async function analyzeProductImage(imageBase64: string): Promise<ProductSuggestion | { error: string }> {
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
     // The prompt provides strict instructions to ensure the output is valid JSON and in Hebrew.
     const prompt = `אתה מומחה להערכת חפצי עתיקות ויד שנייה. 
@@ -49,11 +49,11 @@ export async function analyzeProductImage(imageBase64: string): Promise<ProductS
 
     const response = await result.response;
     const text = response.text();
-    
+
     // Clean-up potential markdown code blocks in the response
     const jsonMatch = text.match(/\{[\s\S]*\}/);
     if (!jsonMatch) throw new Error("No JSON found in AI response");
-    
+
     return JSON.parse(jsonMatch[0]) as ProductSuggestion;
   } catch (error) {
     console.error("Gemini Analysis Error:", error);
