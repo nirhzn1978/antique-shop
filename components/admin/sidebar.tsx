@@ -25,14 +25,16 @@ const navItems = [
 interface AdminSidebarProps {
   className?: string;
   isMobile?: boolean;
+  onItemClick?: () => void;
 }
 
-export default function AdminSidebar({ className, isMobile }: AdminSidebarProps) {
+export default function AdminSidebar({ className, isMobile, onItemClick }: AdminSidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const supabase = createClient();
 
   const handleLogout = async () => {
+    if (onItemClick) onItemClick();
     await supabase.auth.signOut();
     router.push("/admin/login");
   };
@@ -43,7 +45,7 @@ export default function AdminSidebar({ className, isMobile }: AdminSidebarProps)
       className
     )}>
       <div className="p-6 border-b border-border">
-        <Link href="/admin" className="flex items-center gap-2">
+        <Link href="/admin" onClick={onItemClick} className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
             <Package className="w-5 h-5 text-primary-foreground" />
           </div>
@@ -58,6 +60,7 @@ export default function AdminSidebar({ className, isMobile }: AdminSidebarProps)
             <Link
               key={item.href}
               href={item.href}
+              onClick={onItemClick}
               className={cn(
                 "flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group",
                 isActive

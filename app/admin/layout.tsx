@@ -62,6 +62,7 @@ export default function AdminLayout({
   }
 
   const isLoginPage = pathname === "/admin/login";
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   if (isLoginPage) return <>{children}</>;
 
@@ -80,7 +81,7 @@ export default function AdminLayout({
             <span className="font-serif font-bold italic">עתיקה</span>
           </Link>
           
-          <Sheet>
+          <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
             <SheetTrigger
               render={
                 <Button variant="ghost" size="icon" className="rounded-xl border border-border/10">
@@ -89,7 +90,11 @@ export default function AdminLayout({
               }
             />
             <SheetContent side="right" className="p-0 w-72 h-full border-none shadow-2xl">
-              <AdminSidebar className="flex w-full h-full border-none shadow-none" isMobile />
+              <AdminSidebar 
+                className="flex w-full h-full border-none shadow-none" 
+                isMobile 
+                onItemClick={() => setIsMobileMenuOpen(false)} 
+              />
             </SheetContent>
           </Sheet>
         </div>
