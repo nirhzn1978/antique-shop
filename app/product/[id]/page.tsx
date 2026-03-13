@@ -55,6 +55,16 @@ export default async function ProductPage({ params }: Props) {
 
   if (!product) notFound();
 
+  // Increment views in the background
+  try {
+    await supabase
+      .from("products")
+      .update({ views: (product.views || 0) + 1 })
+      .eq("id", product.id);
+  } catch (error) {
+    // Ignore error silently
+  }
+
   const typedProduct = product as Product;
   const imageUrl = typedProduct.images?.[0] ?? "/placeholder.jpg";
   

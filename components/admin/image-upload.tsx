@@ -143,7 +143,7 @@ export default function ImageUpload({ onImagesUploaded, values }: ImageUploadPro
           </div>
         ))}
 
-        {/* Upload Button */}
+        {/* Upload Buttons */}
         <label className={cn(
           "aspect-[4/5] relative rounded-2xl border-2 border-dashed flex flex-col items-center justify-center transition-all cursor-pointer bg-muted/30 hover:bg-muted/50",
           uploading ? "opacity-50 cursor-not-allowed" : "border-border hover:border-primary/30"
@@ -151,12 +151,29 @@ export default function ImageUpload({ onImagesUploaded, values }: ImageUploadPro
           <div className="w-12 h-12 rounded-xl bg-background flex items-center justify-center mb-2 shadow-sm">
             {uploading ? <Loader2 className="w-6 h-6 animate-spin text-primary" /> : <Plus className="w-6 h-6 text-muted-foreground" />}
           </div>
-          <span className="text-xs font-medium font-sans">הוסף תמונות</span>
-          <span className="text-[10px] text-muted-foreground font-sans mt-0.5 leading-tight text-center px-2">עד 10 תמונות, הראשונה תשמש ל-AI</span>
+          <span className="text-xs font-medium font-sans text-center">גלריה</span>
           <input 
             type="file" 
             accept="image/*" 
             multiple 
+            className="hidden" 
+            onChange={handleUpload} 
+            disabled={uploading} 
+          />
+        </label>
+
+        <label className={cn(
+          "aspect-[4/5] relative rounded-2xl border-2 border-dashed flex flex-col items-center justify-center transition-all cursor-pointer bg-muted/30 hover:bg-muted/50",
+          uploading ? "opacity-50 cursor-not-allowed" : "border-border hover:border-primary/30"
+        )}>
+          <div className="w-12 h-12 rounded-xl bg-background flex items-center justify-center mb-2 shadow-sm">
+            {uploading ? <Loader2 className="w-6 h-6 animate-spin text-primary" /> : <Camera className="w-6 h-6 text-muted-foreground" />}
+          </div>
+          <span className="text-xs font-medium font-sans text-center">מצלמה</span>
+          <input 
+            type="file" 
+            accept="image/*" 
+            capture="environment"
             className="hidden" 
             onChange={handleUpload} 
             disabled={uploading} 
