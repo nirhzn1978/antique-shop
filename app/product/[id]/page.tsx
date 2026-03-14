@@ -123,9 +123,21 @@ export default async function ProductPage({ params }: Props) {
                 <h1 className="font-serif text-3xl md:text-4xl text-foreground font-semibold leading-tight">
                   {typedProduct.title}
                 </h1>
-                <p className="font-mono text-2xl text-primary font-bold">
-                  ₪{typedProduct.price.toLocaleString('he-IL')}
-                </p>
+                <div className="flex items-baseline gap-3">
+                  <p className="font-mono text-3xl text-primary font-bold">
+                    ₪{typedProduct.price.toLocaleString('he-IL')}
+                  </p>
+                  {typedProduct.is_on_sale && typedProduct.compare_at_price && typedProduct.compare_at_price > typedProduct.price && (
+                    <p className="font-mono text-xl text-muted-foreground line-through decoration-muted-foreground/40">
+                      ₪{typedProduct.compare_at_price.toLocaleString('he-IL')}
+                    </p>
+                  )}
+                  {typedProduct.is_on_sale && (
+                    <Badge variant="default" className="bg-red-600 hover:bg-red-600 text-white border-none text-xs mr-2">
+                      {typedProduct.sale_label || "מבצע"}
+                    </Badge>
+                  )}
+                </div>
               </div>
 
               <div className="border-y border-border/50 py-6">

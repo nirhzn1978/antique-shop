@@ -9,7 +9,8 @@ import {
   Settings, 
   LogOut,
   ChevronLeft,
-  Tag
+  Tag,
+  Percent
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
@@ -19,6 +20,7 @@ const navItems = [
   { href: "/admin/add", label: "הוספת פריט", icon: PlusCircle },
   { href: "/admin/inventory", label: "ניהול מלאי", icon: Package },
   { href: "/admin/categories", label: "קטגוריות", icon: Tag },
+  { href: "/admin/sales", label: "מבצעים והנחות", icon: Percent },
   { href: "/admin/settings", label: "הגדרות", icon: Settings },
 ];
 

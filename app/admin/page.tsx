@@ -47,6 +47,8 @@ import {
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
+import { useRouter } from "next/navigation";
 
 export default function AdminDashboard() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -57,6 +59,7 @@ export default function AdminDashboard() {
   const [activeStatus, setActiveStatus] = useState("all");
   const [sortBy, setSortBy] = useState("newest");
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const router = useRouter();
   
   const supabase = createClient();
 
@@ -338,9 +341,16 @@ export default function AdminDashboard() {
                       fill
                       className="object-cover"
                     />
+                    {product.is_on_sale && (
+                      <div className="absolute top-1 right-1 z-10">
+                        <Badge className="bg-red-600 text-[8px] h-4 px-1 border-none shadow-sm">
+                          {product.sale_label || "מבצע"}
+                        </Badge>
+                      </div>
+                    )}
                   </div>
                   
-                  <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5">
+                  <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5 cursor-pointer" onClick={() => router.push(`/admin/edit/${product.id}`)}>
                     <div className="flex items-start justify-between gap-2">
                       <h3 className="font-bold text-sm line-clamp-2 leading-tight flex-1">
                         {product.title}
@@ -410,20 +420,37 @@ export default function AdminDashboard() {
                 </thead>
                 <tbody className="divide-y divide-border/50">
                   {filteredProducts.map((product) => (
-                    <tr key={product.id} className="hover:bg-muted/20 transition-colors">
-                      <td className="px-6 py-4">
+                    <tr key={product.id} className="hover:bg-muted/10 transition-colors">
+                      <td className="px-6 py-4 cursor-pointer" onClick={() => router.push(`/admin/edit/${product.id}`)}>
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 relative rounded-md overflow-hidden bg-muted">
+                          <div className="w-10 h-10 relative rounded-md overflow-hidden bg-muted flex-shrink-0">
                             <Image src={product.images?.[0] || "/placeholder.jpg"} alt={product.title} fill className="object-cover" />
+                            {product.is_on_sale && (
+                              <div className="absolute top-0 right-0 z-10">
+                                <Badge className="bg-red-600 text-[7px] p-0 h-3 w-3 flex items-center justify-center border-none" />
+                              </div>
+                            )}
                           </div>
                           <div className="flex flex-col">
-                            <span className="font-medium text-sm line-clamp-1">{product.title}</span>
+                            <div className="flex items-center gap-2">
+                              <span className="font-medium text-sm line-clamp-1">{product.title}</span>
+                              {product.is_on_sale && (
+                                <Badge variant="outline" className="text-[9px] text-red-600 border-red-600/30 bg-red-50 py-0 h-4">מבצע</Badge>
+                              )}
+                            </div>
                             <span className="text-xs text-muted-foreground">{(product as any).categories?.name}</span>
                           </div>
                         </div>
                       </td>
-                      <td className="px-6 py-4 font-mono text-sm">₪{product.price.toLocaleString()}</td>
-                      <td className="px-6 py-4">
+                      <td className="px-6 py-4 font-mono text-sm cursor-pointer" onClick={() => router.push(`/admin/edit/${product.id}`)}>
+                        <div className="flex flex-col">
+                          {product.is_on_sale && product.compare_at_price && (
+                            <span className="text-[10px] text-muted-foreground line-through opacity-50">₪{product.compare_at_price.toLocaleString()}</span>
+                          )}
+                          <span className={cn(product.is_on_sale ? "text-red-600 font-bold" : "")}>₪{product.price.toLocaleString()}</span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 cursor-pointer" onClick={() => router.push(`/admin/edit/${product.id}`)}>
                         <Badge 
                           variant={product.status === 'published' ? 'default' : product.status === 'sold' ? 'secondary' : 'outline'}
                           className="text-[11px]"
@@ -431,7 +458,7 @@ export default function AdminDashboard() {
                           {product.status === 'published' ? 'פעיל' : product.status === 'sold' ? 'נמכר' : 'טיוטה'}
                         </Badge>
                       </td>
-                      <td className="px-6 py-4 font-mono text-sm">
+                      <td className="px-6 py-4 font-mono text-sm cursor-pointer" onClick={() => router.push(`/admin/edit/${product.id}`)}>
                         <div className="flex items-center gap-1">
                           <Eye className="w-3 h-3 text-muted-foreground" />
                           {product.views || 0}

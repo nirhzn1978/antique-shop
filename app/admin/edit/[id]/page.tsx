@@ -32,6 +32,9 @@ export default async function EditProductPage({ params }: Props) {
     shipping_type: product.shipping_type,
     shipping_price: product.shipping_price,
     stock_quantity: product.stock_quantity || 1,
+    is_on_sale: product.is_on_sale || false,
+    compare_at_price: product.compare_at_price,
+    sale_label: product.sale_label || "",
   };
 
   return (

@@ -25,6 +25,9 @@ export interface Product {
   created_at: string;
   updated_at: string;
   stock_quantity: number;
+  compare_at_price?: number | null;
+  is_on_sale?: boolean;
+  sale_label?: string | null;
   // Joined
   categories?: Category;
 }
@@ -39,6 +42,9 @@ export interface ProductFormData {
   shipping_type: ShippingType;
   shipping_price: number | null;
   stock_quantity: number;
+  compare_at_price?: number | null;
+  is_on_sale?: boolean;
+  sale_label?: string | null;
 }
 
 export interface ShopSettings {

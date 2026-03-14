@@ -38,9 +38,19 @@ export default function ProductCard({ product }: ProductCardProps) {
               </Badge>
             </div>
           )}
+          {product.is_on_sale && product.status !== "sold" && (
+            <div className="absolute top-2 start-2 z-10">
+              <Badge
+                variant="default"
+                className="text-[10px] md:text-xs bg-red-600 hover:bg-red-600 text-white shadow-lg border-none animate-in fade-in zoom-in duration-300"
+              >
+                {product.sale_label || "מבצע"}
+              </Badge>
+            </div>
+          )}
           {product.status === "sold" && (
-            <div className="absolute inset-0 bg-foreground/50 flex items-center justify-center">
-              <span className="text-primary-foreground font-serif text-xl font-semibold">
+            <div className="absolute inset-0 bg-foreground/50 z-20 flex items-center justify-center">
+              <span className="text-primary-foreground font-serif text-xl font-semibold backdrop-blur-sm px-4 py-2 border-2 border-primary-foreground/30 rounded-lg">
                 נמכר
               </span>
             </div>
@@ -53,10 +63,17 @@ export default function ProductCard({ product }: ProductCardProps) {
             {product.title}
           </h3>
           <div className="flex items-center justify-between mt-auto pt-2">
-            <p className="font-mono text-primary font-semibold text-base md:text-lg">
-              ₪{product.price.toLocaleString("he-IL")}
-            </p>
-            <span className="text-xs text-muted-foreground whitespace-nowrap">
+            <div className="flex flex-col">
+              {product.is_on_sale && product.compare_at_price && product.compare_at_price > product.price && (
+                <span className="text-[10px] md:text-xs text-muted-foreground line-through decoration-red-500/50 leading-none">
+                  ₪{product.compare_at_price.toLocaleString("he-IL")}
+                </span>
+              )}
+              <p className="font-mono text-primary font-bold text-base md:text-lg leading-tight">
+                ₪{product.price.toLocaleString("he-IL")}
+              </p>
+            </div>
+            <span className="text-[10px] md:text-xs text-muted-foreground whitespace-nowrap bg-muted/50 px-2 py-0.5 rounded-full">
               {shippingLabel[product.shipping_type]}
             </span>
           </div>

@@ -12,7 +12,9 @@ import {
   Info,
   DollarSign,
   Truck,
-  Image as ImageIcon
+  ImageIcon,
+  Tag,
+  Percent
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -57,16 +59,22 @@ export default function UploadFlow({ initialData, productId }: UploadFlowProps) 
   const [categories, setCategories] = useState<Category[]>([]);
   
   // Main form state
-  const [formData, setFormData] = useState<ProductFormData>(initialData || {
-    title: "",
-    description: "",
-    price: 0,
-    category_id: "",
-    images: [],
-    status: "published",
-    shipping_type: "pickup",
-    shipping_price: null,
-    stock_quantity: 1,
+  const [formData, setFormData] = useState<ProductFormData>(() => {
+    if (initialData) return initialData;
+    return {
+      title: "",
+      description: "",
+      price: 0,
+      category_id: "",
+      images: [],
+      status: "published",
+      shipping_type: "pickup",
+      shipping_price: null,
+      stock_quantity: 1,
+      is_on_sale: false,
+      compare_at_price: null,
+      sale_label: "",
+    };
   });
 
   // Base64 version of the first image, used for AI analysis
@@ -378,6 +386,65 @@ export default function UploadFlow({ initialData, productId }: UploadFlowProps) 
                     onChange={e => setFormData(prev => ({ ...prev, price: Number(e.target.value) }))}
                     className="text-2xl font-mono font-bold"
                   />
+                </div>
+
+                <div className="p-4 rounded-2xl border-2 border-dashed border-border/50 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Tag className={cn("w-5 h-5", formData.is_on_sale ? "text-primary" : "text-muted-foreground")} />
+                      <Label className="text-base font-bold cursor-pointer" htmlFor="sale-toggle">האם הפריט במבצע?</Label>
+                    </div>
+                    <button 
+                      id="sale-toggle"
+                      onClick={() => setFormData(prev => ({ 
+                        ...prev, 
+                        is_on_sale: !prev.is_on_sale,
+                        ...(prev.is_on_sale ? { compare_at_price: null, sale_label: "" } : {})
+                      }))}
+                      className={cn(
+                        "w-12 h-6 rounded-full p-1 transition-colors duration-200",
+                        formData.is_on_sale ? "bg-primary" : "bg-muted"
+                      )}
+                    >
+                      <div className={cn(
+                        "w-4 h-4 bg-white rounded-full transition-transform duration-200",
+                        formData.is_on_sale ? "translate-x-6" : "translate-x-0"
+                      )} />
+                    </button>
+                  </div>
+
+                  {formData.is_on_sale && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2 animate-in fade-in slide-in-from-top-2">
+                      <div className="space-y-2">
+                        <Label>מחיר לפני הנחה (₪)</Label>
+                        <Input 
+                          type="number" 
+                          value={formData.compare_at_price || ""} 
+                          onChange={e => {
+                            const val = Number(e.target.value);
+                            setFormData(prev => {
+                              const discount = val > prev.price ? Math.round(((val - prev.price) / val) * 100) : 0;
+                              return { 
+                                ...prev, 
+                                compare_at_price: val,
+                                sale_label: discount > 0 ? `${discount}% הנחה` : prev.sale_label
+                              };
+                            });
+                          }}
+                          placeholder="0"
+                          className="font-mono"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>תווית מבצע (חופשי)</Label>
+                        <Input 
+                          value={formData.sale_label || ""} 
+                          onChange={e => setFormData(prev => ({ ...prev, sale_label: e.target.value }))}
+                          placeholder="למשל: 20% הנחה"
+                        />
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <div className="space-y-4">
