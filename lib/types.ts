@@ -47,8 +47,13 @@ export interface ShopSettings {
   phone_number: string;
   whatsapp_number: string;
   email_address: string;
+  shop_address: string;
+  waze_url: string;
+  google_maps_url: string;
   hero_title_part1: string;
   hero_title_part2: string;
   hero_description: string;
+  footer_description: string;
+  footer_copyright: string;
   updated_at: string;
 }

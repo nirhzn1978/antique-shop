@@ -148,11 +148,12 @@ export default function InventoryPage() {
               </Button>
             }
           />
-          <SheetContent side="right" className="font-sans overflow-y-auto w-80">
-            <SheetHeader>
-              <SheetTitle>סינון ומיון פריטים</SheetTitle>
+          <SheetContent side="bottom" className="font-sans h-[80vh] rounded-t-3xl border-t shadow-2xl p-0 overflow-hidden flex flex-col">
+            <div className="w-12 h-1.5 bg-muted rounded-full mx-auto mt-3 flex-shrink-0" />
+            <SheetHeader className="px-6 pt-2 pb-4 border-b">
+              <SheetTitle className="text-right">סינון ומיון פריטים</SheetTitle>
             </SheetHeader>
-            <div className="py-6 space-y-6">
+            <div className="flex-1 overflow-y-auto px-6 py-6 space-y-8">
               
               <div className="space-y-2">
                 <label className="text-sm font-medium text-muted-foreground">מיון לפי</label>
@@ -236,122 +237,174 @@ export default function InventoryPage() {
         </Sheet>
       </div>
 
-      {/* Inventory Table */}
-      <div className="bg-card rounded-2xl border border-border/50 overflow-hidden shadow-sm">
+      {/* Inventory List (Mobile Cards / Desktop Table) */}
+      <div className="space-y-4">
         {loading ? (
-          <div className="py-20 flex flex-col items-center justify-center space-y-4">
+          <div className="bg-card rounded-2xl border border-border/50 py-20 flex flex-col items-center justify-center space-y-4">
             <Loader2 className="w-10 h-10 animate-spin text-primary" />
             <span className="text-muted-foreground font-sans">טוען מלאי...</span>
           </div>
-        ) : (
-          <div className="overflow-x-auto -mx-4 md:mx-0">
-            <div className="min-w-[800px] md:min-w-full inline-block align-middle">
-            <table className="w-full text-right">
-              <thead>
-                <tr className="border-b border-border bg-muted/30">
-                  <th className="px-6 py-4 font-sans text-xs font-semibold uppercase tracking-wider text-muted-foreground">תמונה</th>
-                  <th className="px-6 py-4 font-sans text-xs font-semibold uppercase tracking-wider text-muted-foreground">שם המוצר</th>
-                  <th className="px-6 py-4 font-sans text-xs font-semibold uppercase tracking-wider text-muted-foreground">קטגוריה</th>
-                  <th className="px-6 py-4 font-sans text-xs font-semibold uppercase tracking-wider text-muted-foreground">כמות</th>
-                  <th className="px-6 py-4 font-sans text-xs font-semibold uppercase tracking-wider text-muted-foreground">מחיר</th>
-                  <th className="px-6 py-4 font-sans text-xs font-semibold uppercase tracking-wider text-muted-foreground">סטטוס</th>
-                  <th className="px-6 py-4 font-sans text-xs font-semibold uppercase tracking-wider text-muted-foreground">פעולות</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border/50 font-sans">
-                {filteredProducts.map((p) => (
-                  <tr key={p.id} className="hover:bg-muted/10 transition-colors">
-                    <td className="px-6 py-4">
-                      <div className="w-12 h-15 relative rounded-lg overflow-hidden bg-muted border border-border/30 shadow-sm">
-                        <Image 
-                          src={p.images?.[0] || "/placeholder.jpg"} 
-                          alt={p.title}
-                          fill
-                          className="object-cover"
-                        />
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className="font-medium text-sm block max-w-xs truncate">{p.title}</span>
-                      <span className="text-[10px] text-muted-foreground font-mono">ID: {p.id.slice(0,8)}</span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <Badge variant="outline" className="font-normal text-xs">{ (p as any).categories?.name || 'ללא' }</Badge>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className={cn(
-                        "text-sm font-medium",
-                        p.stock_quantity === 0 ? "text-destructive" : ""
-                      )}>
-                        {p.stock_quantity}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-sm font-mono font-bold">₪{p.price.toLocaleString()}</td>
-                    <td className="px-6 py-4">
-                      <Badge 
-                        variant={p.status === 'published' ? 'default' : p.status === 'sold' ? 'secondary' : 'outline'}
-                        className="text-[10px]"
-                      >
-                        {p.status === 'published' ? 'פעיל' : p.status === 'sold' ? 'נמכר' : 'טיוטה'}
-                      </Badge>
-                    </td>
-                    <td className="px-6 py-4">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="rounded-full">
-                            <MoreHorizontal className="w-4 h-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="font-sans min-w-[160px]">
-                          <DropdownMenuLabel>אפשרויות</DropdownMenuLabel>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem asChild>
-                            <Link href={`/admin/edit/${p.id}`} className="flex items-center">
-                              <Edit className="w-4 h-4 ml-2" />
-                              ערוך פרטים
-                            </Link>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => window.open(`/product/${p.id}`, "_blank")}>
-                            <ExternalLink className="w-4 h-4 ml-2" />
-                            צפה באתר
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => toggleStatus(p.id, p.status)}>
-                            {p.status === 'published' ? (
-                              <>
-                                <EyeOff className="w-4 h-4 ml-2" />
-                                סמן כנמכר
-                              </>
-                            ) : (
-                              <>
-                                <Eye className="w-4 h-4 ml-2" />
-                                סמן כפעיל
-                              </>
-                            )}
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem 
-                            className="text-destructive focus:text-destructive focus:bg-destructive/10"
-                            onClick={() => deleteProduct(p.id)}
-                          >
-                            <Trash2 className="w-4 h-4 ml-2" />
-                            מחק לצמיתות
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </td>
-                  </tr>
-                ))}
-                {filteredProducts.length === 0 && !loading && (
-                  <tr>
-                    <td colSpan={6} className="px-6 py-12 text-center text-muted-foreground bg-muted/10">
-                      לא נמצאו פריטים העונים לחיפוש...
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+        ) : filteredProducts.length === 0 ? (
+          <div className="bg-card rounded-2xl border border-border/50 py-12 text-center text-muted-foreground font-sans">
+            לא נמצאו פריטים העונים לחיפוש...
           </div>
-        </div>
+        ) : (
+          <>
+            {/* Mobile View: Cards */}
+            <div className="grid grid-cols-1 gap-4 md:hidden">
+              {filteredProducts.map((p) => (
+                <div key={p.id} className="bg-card rounded-2xl border border-border/50 p-4 shadow-sm flex gap-4">
+                  <div className="w-20 h-24 relative rounded-xl overflow-hidden bg-muted border border-border/30 flex-shrink-0">
+                    <Image 
+                      src={p.images?.[0] || "/placeholder.jpg"} 
+                      alt={p.title}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                  <div className="flex-1 min-w-0 flex flex-col justify-between">
+                    <div className="space-y-1">
+                      <div className="flex items-start justify-between gap-2">
+                        <span className="font-bold text-sm line-clamp-2 leading-tight">{p.title}</span>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 -mr-2">
+                              <MoreHorizontal className="w-4 h-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="font-sans min-w-[160px]">
+                            <DropdownMenuLabel>אפשרויות</DropdownMenuLabel>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem asChild>
+                              <Link href={`/admin/edit/${p.id}`} className="flex items-center">
+                                <Edit className="w-4 h-4 ml-2" />
+                                ערוך פרטים
+                              </Link>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => window.open(`/product/${p.id}`, "_blank")}>
+                              <ExternalLink className="w-4 h-4 ml-2" />
+                              צפה באתר
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => toggleStatus(p.id, p.status)}>
+                              {p.status === 'published' ? (
+                                <><EyeOff className="w-4 h-4 ml-2" /> סמן כנמכר</>
+                              ) : (
+                                <><Eye className="w-4 h-4 ml-2" /> סמן כפעיל</>
+                              )}
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem 
+                              className="text-destructive focus:text-destructive focus:bg-destructive/10"
+                              onClick={() => deleteProduct(p.id)}
+                            >
+                              <Trash2 className="w-4 h-4 ml-2" />
+                              מחק לצמיתות
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                      <div className="flex flex-wrap gap-1 items-center">
+                        <Badge variant="outline" className="text-[10px] py-0 h-4">{ (p as any).categories?.name || 'ללא' }</Badge>
+                        <Badge 
+                          variant={p.status === 'published' ? 'default' : p.status === 'sold' ? 'secondary' : 'outline'}
+                          className="text-[10px] py-0 h-4"
+                        >
+                          {p.status === 'published' ? 'פעיל' : p.status === 'sold' ? 'נמכר' : 'טיוטה'}
+                        </Badge>
+                      </div>
+                    </div>
+                    <div className="flex items-end justify-between mt-2">
+                      <div className="text-xs text-muted-foreground">
+                        מלאי: <span className={cn(p.stock_quantity === 0 ? "text-destructive font-bold" : "")}>{p.stock_quantity}</span>
+                      </div>
+                      <div className="text-sm font-mono font-bold text-primary">₪{p.price.toLocaleString()}</div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Desktop View: Table */}
+            <div className="hidden md:block bg-card rounded-2xl border border-border/50 overflow-hidden shadow-sm">
+              <table className="w-full text-right">
+                <thead>
+                  <tr className="border-b border-border bg-muted/30">
+                    <th className="px-6 py-4 font-sans text-xs font-semibold uppercase tracking-wider text-muted-foreground">תמונה</th>
+                    <th className="px-6 py-4 font-sans text-xs font-semibold uppercase tracking-wider text-muted-foreground">שם המוצר</th>
+                    <th className="px-6 py-4 font-sans text-xs font-semibold uppercase tracking-wider text-muted-foreground">קטגוריה</th>
+                    <th className="px-6 py-4 font-sans text-xs font-semibold uppercase tracking-wider text-muted-foreground">כמות</th>
+                    <th className="px-6 py-4 font-sans text-xs font-semibold uppercase tracking-wider text-muted-foreground">מחיר</th>
+                    <th className="px-6 py-4 font-sans text-xs font-semibold uppercase tracking-wider text-muted-foreground">סטטוס</th>
+                    <th className="px-6 py-4 font-sans text-xs font-semibold uppercase tracking-wider text-muted-foreground">פעולות</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border/50 font-sans">
+                  {filteredProducts.map((p) => (
+                    <tr key={p.id} className="hover:bg-muted/10 transition-colors">
+                      <td className="px-6 py-4">
+                        <div className="w-12 h-15 relative rounded-lg overflow-hidden bg-muted border border-border/30 shadow-sm">
+                          <Image src={p.images?.[0] || "/placeholder.jpg"} alt={p.title} fill className="object-cover" />
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className="font-medium text-sm block max-w-xs truncate">{p.title}</span>
+                        <span className="text-[10px] text-muted-foreground font-mono">ID: {p.id.slice(0,8)}</span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <Badge variant="outline" className="font-normal text-xs">{ (p as any).categories?.name || 'ללא' }</Badge>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className={cn("text-sm font-medium", p.stock_quantity === 0 ? "text-destructive" : "")}>
+                          {p.stock_quantity}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-sm font-mono font-bold">₪{p.price.toLocaleString()}</td>
+                      <td className="px-6 py-4">
+                        <Badge 
+                          variant={p.status === 'published' ? 'default' : p.status === 'sold' ? 'secondary' : 'outline'}
+                          className="text-[10px]"
+                        >
+                          {p.status === 'published' ? 'פעיל' : p.status === 'sold' ? 'נמכר' : 'טיוטה'}
+                        </Badge>
+                      </td>
+                      <td className="px-6 py-4">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" className="rounded-full">
+                              <MoreHorizontal className="w-4 h-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="font-sans min-w-[160px]">
+                            <DropdownMenuLabel>אפשרויות</DropdownMenuLabel>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem asChild>
+                              <Link href={`/admin/edit/${p.id}`} className="flex items-center">
+                                <Edit className="w-4 h-4 ml-2" /> ערוך פרטים
+                              </Link>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => window.open(`/product/${p.id}`, "_blank")}>
+                              <ExternalLink className="w-4 h-4 ml-2" /> צפה באתר
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => toggleStatus(p.id, p.status)}>
+                              {p.status === 'published' ? (
+                                <><EyeOff className="w-4 h-4 ml-2" /> סמן כנמכר</>
+                              ) : (
+                                <><Eye className="w-4 h-4 ml-2" /> סמן כפעיל</>
+                              )}
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => deleteProduct(p.id)}>
+                              <Trash2 className="w-4 h-4 ml-2" /> מחק לצמיתות
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
       </div>
     </div>

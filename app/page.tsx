@@ -3,6 +3,7 @@ import StorefrontHeader from "@/components/storefront/header";
 import CategoryFilter from "@/components/storefront/category-filter";
 import ProductCard from "@/components/storefront/product-card";
 import { Category, Product } from "@/lib/types";
+import { MapPin, MessageCircle, Phone, Mail } from "lucide-react";
 
 interface Props {
   searchParams: Promise<{ category?: string; search?: string }>;
@@ -92,42 +93,143 @@ export default async function CatalogPage({ searchParams }: Props) {
         )}
       </main>
 
-      <footer className="border-t border-border py-12 bg-card">
-        <div className="container mx-auto px-4 max-w-7xl grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div className="space-y-4">
-            <h3 className="font-serif text-xl font-semibold">חנות עתיקות</h3>
-            <p className="text-muted-foreground text-sm leading-relaxed">
-              מקום לאוהבי יופי של פעם, עיצוב עם נשמה וסיפורים מאחורי חפצים. 
-              אנחנו עושים כבוד להיסטוריה ומביאים אותה לבית המודרני.
+      <footer className="border-t border-border py-16 bg-card/50">
+        <div className="container mx-auto px-4 max-w-7xl">
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-12">
+            {/* Shop Info */}
+            <div className="md:col-span-4 space-y-4">
+              <h3 className="font-serif text-2xl font-semibold">{settings?.shop_name || "חנות עתיקות"}</h3>
+              <p className="text-muted-foreground text-sm leading-relaxed max-w-sm">
+                {settings?.footer_description || "מקום לאוהבי יופי של פעם, עיצוב עם נשמה וסיפורים מאחורי חפצים. אנחנו עושים כבוד להיסטוריה ומביאים אותה לבית המודרני."}
+              </p>
+            </div>
+
+            {/* Categories Link List */}
+            <div className="md:col-span-2">
+              <h4 className="font-sans font-semibold mb-6 text-sm uppercase tracking-widest text-foreground/70">קטגוריות</h4>
+              <ul className="space-y-3">
+                {(categories as Category[]).slice(0, 6).map(cat => (
+                  <li key={cat.id}>
+                    <a href={`/?category=${cat.slug}`} className="text-muted-foreground hover:text-primary transition-colors text-sm font-sans flex items-center gap-2 group">
+                      <span className="w-1 h-1 rounded-full bg-border group-hover:bg-primary transition-colors"></span>
+                      {cat.name}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Map & Contact */}
+            <div className="md:col-span-6 space-y-6">
+              <h4 className="font-sans font-semibold text-sm uppercase tracking-widest text-foreground/70">הפינה שלנו</h4>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 items-start">
+                {/* Map Iframe */}
+                <div className="rounded-2xl overflow-hidden border border-border/50 h-40 bg-muted relative group">
+                  {settings?.google_maps_url ? (
+                    <iframe
+                      width="100%"
+                      height="100%"
+                      frameBorder="0"
+                      style={{ border: 0 }}
+                      src={`https://maps.google.com/maps?q=${encodeURIComponent(settings.google_maps_url)}&t=&z=15&ie=UTF8&iwloc=&output=embed`}
+                      allowFullScreen
+                    ></iframe>
+                  ) : (
+                    <div className="absolute inset-0 flex items-center justify-center text-muted-foreground/30">
+                      <MapPin className="w-10 h-10" />
+                    </div>
+                  )}
+                  <div className="absolute inset-0 bg-transparent group-hover:bg-black/5 transition-colors pointer-events-none" />
+                </div>
+
+                {/* Contact Icons List */}
+                <div className="space-y-4">
+                  <p className="text-muted-foreground text-sm italic mb-2 font-sans">
+                    זמינים לכל שאלה בדרכים הבאות:
+                  </p>
+                  
+                  <div className="flex flex-col gap-3">
+                    {settings?.whatsapp_number && (
+                      <a 
+                        href={`https://wa.me/${settings.whatsapp_number}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-3 text-sm font-medium hover:text-whatsapp transition-colors group"
+                      >
+                        <div className="w-8 h-8 rounded-full bg-whatsapp/10 flex items-center justify-center text-whatsapp group-hover:scale-110 transition-transform">
+                          <MessageCircle className="w-4 h-4" />
+                        </div>
+                        <span>WhatsApp</span>
+                      </a>
+                    )}
+                    
+                    {settings?.waze_url && (
+                      <a 
+                        href={settings.waze_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-3 text-sm font-medium hover:text-emerald-600 transition-colors group"
+                      >
+                        <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 group-hover:scale-110 transition-transform">
+                          <MapPin className="w-4 h-4" />
+                        </div>
+                        <span>Waze (ניווט)</span>
+                      </a>
+                    )}
+
+                    {settings?.google_maps_url && (
+                      <a 
+                        href={settings.google_maps_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-3 text-sm font-medium hover:text-blue-600 transition-colors group"
+                      >
+                        <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 group-hover:scale-110 transition-transform">
+                          <MapPin className="w-4 h-4" />
+                        </div>
+                        <span>Google Maps</span>
+                      </a>
+                    )}
+
+                    {settings?.phone_number && (
+                      <a 
+                        href={`tel:${settings.phone_number}`}
+                        className="flex items-center gap-3 text-sm font-medium hover:text-slate-600 transition-colors group"
+                      >
+                        <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 group-hover:scale-110 transition-transform">
+                          <Phone className="w-4 h-4" />
+                        </div>
+                        <span>{settings.phone_number}</span>
+                      </a>
+                    )}
+
+                    {settings?.email_address && (
+                      <a 
+                        href={`mailto:${settings.email_address}`}
+                        className="flex items-center gap-3 text-sm font-medium hover:text-amber-600 transition-colors group"
+                      >
+                        <div className="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center text-amber-600 group-hover:scale-110 transition-transform">
+                          <Mail className="w-4 h-4" />
+                        </div>
+                        <span className="truncate">{settings.email_address}</span>
+                      </a>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-16 pt-8 border-t border-border flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-muted-foreground font-sans">
+            <p>
+              {settings?.footer_copyright || `© ${new Date().getFullYear()} ${settings?.shop_name || "Antique Shop"}`}
             </p>
+            <div className="flex gap-6">
+              <a href="#" className="hover:text-foreground transition-colors">תקנון</a>
+              <a href="#" className="hover:text-foreground transition-colors">מדיניות פרטיות</a>
+            </div>
           </div>
-          <div>
-            <h4 className="font-sans font-semibold mb-4 text-sm uppercase tracking-wider">קטגוריות</h4>
-            <ul className="space-y-2">
-              {(categories as Category[]).slice(0, 5).map(cat => (
-                <li key={cat.id}>
-                  <a href={`/?category=${cat.slug}`} className="text-muted-foreground hover:text-primary transition-colors text-sm">
-                    {cat.name}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
-          <div>
-            <h4 className="font-sans font-semibold mb-4 text-sm uppercase tracking-wider">צרו קשר</h4>
-            <p className="text-muted-foreground text-sm mb-4 italic">
-              זמינים לכל שאלה בוואטסאפ או בטלגרם.
-            </p>
-            <a 
-              href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER}`}
-              className="inline-flex items-center justify-center px-6 py-2 bg-whatsapp text-white rounded-lg hover:brightness-95 transition-all font-sans font-medium"
-            >
-              וואטסאפ של החנות
-            </a>
-          </div>
-        </div>
-        <div className="container mx-auto px-4 mt-12 pt-8 border-t border-border text-center text-xs text-muted-foreground font-mono">
-          &copy; {new Date().getFullYear()} Antique Shop. Built with Soul & AI
         </div>
       </footer>
     </div>

@@ -76,7 +76,7 @@ export default async function ProductPage({ params }: Props) {
   const productUrl = `${siteUrl}/product/${typedProduct.id}`;
 
   // Fallback to env if DB settings are empty
-  const whatsappNumber = settings?.whatsapp_number || process.env.NEXT_PUBLIC_WHATSAPP_NUMBER;
+  const whatsappNumber = settings?.whatsapp_number;
   const shopName = settings?.shop_name || process.env.NEXT_PUBLIC_SHOP_NAME || "חנות העתיקות";
   const emailAddress = settings?.email_address;
   
@@ -150,17 +150,19 @@ export default async function ProductPage({ params }: Props) {
 
             {/* Action Buttons */}
             <div className="mt-12 space-y-3">
-              <a 
-                href={`https://wa.me/${whatsappNumber}?text=${whatsappMessage}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="btn-press flex items-center justify-center gap-2 w-full py-4 bg-[#25D366] hover:brightness-95 text-white font-sans font-bold text-lg rounded-2xl shadow-lg shadow-green-500/20"
-              >
-                <div className="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center">
-                  <span className="text-xs">WA</span>
-                </div>
-                <span>דברו איתנו ב-WhatsApp</span>
-              </a>
+              {whatsappNumber && (
+                <a 
+                  href={`https://wa.me/${whatsappNumber}?text=${whatsappMessage}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn-press flex items-center justify-center gap-2 w-full py-4 bg-[#25D366] hover:brightness-95 text-white font-sans font-bold text-lg rounded-2xl shadow-lg shadow-green-500/20"
+                >
+                  <div className="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center">
+                    <span className="text-xs">WA</span>
+                  </div>
+                  <span>דברו איתנו ב-WhatsApp</span>
+                </a>
+              )}
 
               {emailAddress && (
                 <a 

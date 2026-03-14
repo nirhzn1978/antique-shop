@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Save, Loader2, Phone, MessageSquare, Mail, Store } from "lucide-react";
+import { Save, Loader2, Phone, MessageSquare, Mail, Store, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -106,6 +106,42 @@ export default function SettingsPage() {
                   placeholder="972500000000"
                 />
               </div>
+              <div className="space-y-2">
+                <Label className="flex items-center gap-2">
+                  <Mail className="w-4 h-4 text-primary" />
+                  כתובת דואר אלקטרוני
+                </Label>
+                <Input 
+                  type="email"
+                  value={settings?.email_address || ""} 
+                  onChange={e => setSettings(prev => prev ? { ...prev, email_address: e.target.value } : null)}
+                  placeholder="shop@example.com"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label className="flex items-center gap-2 text-emerald-600">
+                  <MapPin className="w-4 h-4" />
+                  קישור ל-Waze
+                </Label>
+                <Input 
+                  value={settings?.waze_url || ""} 
+                  onChange={e => setSettings(prev => prev ? { ...prev, waze_url: e.target.value } : null)}
+                  placeholder="https://waze.com/ul/..."
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label className="flex items-center gap-2 text-blue-600">
+                  <MapPin className="w-4 h-4" />
+                  קישור ל-Google Maps
+                </Label>
+                <Input 
+                  value={settings?.google_maps_url || ""} 
+                  onChange={e => setSettings(prev => prev ? { ...prev, google_maps_url: e.target.value } : null)}
+                  placeholder="https://maps.google.com/..."
+                />
+              </div>
             </div>
 
             <div className="space-y-4 pt-4 border-t border-border/50">
@@ -127,15 +163,35 @@ export default function SettingsPage() {
                     placeholder="סיפור חדש אצלך"
                   />
                 </div>
+                <div className="space-y-2 md:col-span-2">
+                  <Label>תיאור עמוד הבית</Label>
+                  <textarea 
+                    className="w-full min-h-[100px] rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                    value={settings?.hero_description || ""} 
+                    onChange={e => setSettings(prev => prev ? { ...prev, hero_description: e.target.value } : null)}
+                    placeholder="אנחנו אוספים עתיקות, וינטג׳..."
+                  />
+                </div>
               </div>
+            </div>
 
+            <div className="space-y-4 pt-4 border-t border-border/50">
+              <h3 className="font-serif font-medium">תוכן תחתית האתר (Footer)</h3>
               <div className="space-y-2">
-                <Label>תיאור עמוד הבית</Label>
+                <Label>תיאור ב-Footer</Label>
                 <textarea 
-                  className="w-full min-h-[100px] rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-                  value={settings?.hero_description || ""} 
-                  onChange={e => setSettings(prev => prev ? { ...prev, hero_description: e.target.value } : null)}
-                  placeholder="אנחנו אוספים עתיקות, וינטג׳..."
+                  className="w-full min-h-[80px] rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                  value={settings?.footer_description || ""} 
+                  onChange={e => setSettings(prev => prev ? { ...prev, footer_description: e.target.value } : null)}
+                  placeholder="מקום לאוהבי יופי של פעם..."
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>טקסט זכויות יוצרים (Copyright)</Label>
+                <Input 
+                  value={settings?.footer_copyright || ""} 
+                  onChange={e => setSettings(prev => prev ? { ...prev, footer_copyright: e.target.value } : null)}
+                  placeholder="© 2026 שאבי חנות עתיקות ויד שניה"
                 />
               </div>
             </div>

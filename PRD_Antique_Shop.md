@@ -41,7 +41,7 @@ A lean, mobile-first web application designed for a shop owner to manage and sel
 ## 5. Database Schema
 - **categories:** `id, name, slug, parent_id (self-relation), sort_order`
 - **products:** `id, title, description, price, images (text array), stock_quantity, shipping_type, shipping_price, category_id, status (published/sold/draft), views`
-- **shop_settings:** `id, shop_name, whatsapp_number, email_address, phone_number, hero_title_part1, hero_title_part2, hero_description`
+- **shop_settings:** `id, shop_name, whatsapp_number, email_address, phone_number, shop_address, waze_url, google_maps_url, hero_title_part1, hero_title_part2, hero_description, footer_description, footer_copyright`
 
 ## 6. Implementation Principles
 - **Cost-Efficiency:** Maximum use of free tiers (Gemini, Supabase, Vercel).
