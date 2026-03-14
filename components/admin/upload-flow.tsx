@@ -50,7 +50,7 @@ export default function UploadFlow({ initialData, productId }: UploadFlowProps) 
   const router = useRouter();
   
   // step 1: Images, step 2: Details, step 3: Pricing/Shipping
-  const [step, setStep] = useState(productId ? 2 : 1); 
+  const [step, setStep] = useState(1); 
   
   const [loading, setLoading] = useState(false);
   const [analyzing, setAnalyzing] = useState(false);
@@ -137,10 +137,17 @@ export default function UploadFlow({ initialData, productId }: UploadFlowProps) 
       const url = productId ? `/api/products/${productId}` : "/api/products";
       const method = productId ? "PUT" : "POST";
 
+      // Ensure category_id defaults to "Other" (find by slug or name if possible, or just default to the ID if we have it)
+      const otherCategory = categories.find(c => c.name === "אחר" || c.slug === "other");
+      const finalFormData = {
+        ...formData,
+        category_id: formData.category_id || otherCategory?.id || ""
+      };
+
       const res = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(finalFormData),
       });
 
       if (!res.ok) throw new Error("נכשל בשמירת המוצר");
@@ -189,8 +196,14 @@ export default function UploadFlow({ initialData, productId }: UploadFlowProps) 
           {step === 1 && (
             <div className="space-y-6">
               <div className="space-y-2 text-center">
-                <h2 className="text-2xl font-serif font-bold">צילום הפריט</h2>
-                <p className="text-muted-foreground font-sans">העלה תמונה ברורה לקבלת תוצאות טובות יותר מה-AI</p>
+                <h2 className="text-2xl font-serif font-bold">
+                  {productId ? "ניהול תמונות" : "צילום הפריט"}
+                </h2>
+                <p className="text-muted-foreground font-sans">
+                  {productId 
+                    ? "הוסף או הסר תמונות מהפריט (הראשונה היא הראשית)" 
+                    : "העלה תמונה ברורה לקבלת תוצאות טובות יותר מה-AI"}
+                </p>
               </div>
               
               <ImageUpload 
@@ -204,21 +217,33 @@ export default function UploadFlow({ initialData, productId }: UploadFlowProps) 
               />
 
               <div className="pt-4">
-                <Button 
-                  className="w-full h-14 text-lg font-sans font-bold gap-2 btn-press shadow-lg shadow-primary/20"
-                  disabled={formData.images.length === 0 || analyzing}
-                  onClick={handleAnalyze}
-                >
-                  {analyzing ? <Loader2 className="animate-spin" /> : <Sparkles className="w-5 h-5" />}
-                  נתח תמונה עם AI והמשך
-                </Button>
-                <button 
-                  className="w-full mt-4 text-muted-foreground hover:text-foreground text-sm font-sans"
-                  onClick={() => setStep(2)}
-                  disabled={formData.images.length === 0}
-                >
-                  דלג על ניתוח ומלא ידנית
-                </button>
+                {!productId ? (
+                  <>
+                    <Button 
+                      className="w-full h-14 text-lg font-sans font-bold gap-2 btn-press shadow-lg shadow-primary/20"
+                      disabled={formData.images.length === 0 || analyzing}
+                      onClick={handleAnalyze}
+                    >
+                      {analyzing ? <Loader2 className="animate-spin" /> : <Sparkles className="w-5 h-5" />}
+                      נתח תמונה עם AI והמשך
+                    </Button>
+                    <button 
+                      className="w-full mt-4 text-muted-foreground hover:text-foreground text-sm font-sans"
+                      onClick={() => setStep(2)}
+                      disabled={formData.images.length === 0}
+                    >
+                      דלג על ניתוח ומלא ידנית
+                    </button>
+                  </>
+                ) : (
+                  <Button 
+                    className="w-full h-14 text-lg font-sans font-bold gap-2 btn-press shadow-lg shadow-primary/20"
+                    onClick={() => setStep(2)}
+                  >
+                    <Check className="w-5 h-5" />
+                    המשך לעריכת פרטים
+                  </Button>
+                )}
               </div>
             </div>
           )}
@@ -405,7 +430,7 @@ export default function UploadFlow({ initialData, productId }: UploadFlowProps) 
                   disabled={loading}
                 >
                   {loading ? <Loader2 className="animate-spin" /> : <Check className="w-4 h-4" />}
-                  פרסם פריט לחנות
+                  {productId ? "שמור שינויים" : "פרסם פריט לחנות"}
                 </Button>
               </div>
             </div>
